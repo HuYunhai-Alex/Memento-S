@@ -15,15 +15,16 @@ How to use skills:
 - Base directory provided in output for resolving bundled resources (references/, scripts/, assets/)
 
 Usage notes:
-- Only use skills listed in <available_skills> below
-- Do not invoke a skill that is already loaded in your context
-- Each skill invocation is stateless
-</usage>
-
-<available_skills>
+- Only use skills listed in <available_skills>
 
 <skill>
 <name>filesystem</name>
+<description>Direct filesystem operations (read, write, edit, list, search files and directories). Use for any file manipulation tasks including reading file contents, writing or overwriting files, editing/replacing text in files, copying, moving, deleting files, listing directories, building directory trees, and searching with glob patterns. Also use when the user asks to view, show, display, or inspect files or folder structures.</description>
+<location>project</location>
+</skill>
+
+<skill>
+<name>memoryGit</name>
 <description>Direct filesystem operations (read, write, edit, list, search files and directories). Use for any file manipulation tasks including reading file contents, writing or overwriting files, editing/replacing text in files, copying, moving, deleting files, listing directories, building directory trees, and searching with glob patterns. Also use when the user asks to view, show, display, or inspect files or folder structures.</description>
 <location>project</location>
 </skill>
