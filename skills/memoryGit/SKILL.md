@@ -1,6 +1,6 @@
 ---
 name: memoryGit
-description: Direct filesystem operations (read, write, edit, list, search files and directories). Use for any file manipulation tasks including reading file contents, writing or overwriting files, editing/replacing text in files, copying, moving, deleting files, listing directories, building directory trees, and searching with glob patterns. Also use when the user asks to view, show, display, or inspect files or folder structures.
+description: A reference guide for generating memgit CLI commands to manage memory version control, including environment scoping, item management, and release workflows.
 ---
 
 # MemoryGit CLI Skill
