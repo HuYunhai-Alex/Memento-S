@@ -24,6 +24,7 @@ from core.config import (
     SEMANTIC_ROUTER_WRITE_VISIBLE_AGENTS,
 )
 from core.llm import get_llm_call_budget, openrouter_messages
+from core.memory.memgit_bridge import load_skills_xml_from_memgit, upsert_skills_xml_to_memgit
 from core.utils.json_utils import parse_json_output
 from core.utils.logging_utils import log_event
 from core.utils.path_utils import _truncate_middle, _xml_escape
@@ -46,6 +47,9 @@ def load_available_skills_block_from(path: str) -> str:
 
 
 def load_available_skills_block() -> str:
+    memgit_xml = load_skills_xml_from_memgit()
+    if isinstance(memgit_xml, str) and memgit_xml.strip():
+        return memgit_xml
     return load_available_skills_block_from(AGENTS_MD)
 
 
@@ -77,6 +81,9 @@ def write_visible_skills_block(skills_xml: str, target_path: str = AGENTS_MD) ->
             target_path=target_path,
             error=f"{type(exc).__name__}: {exc}",
         )
+
+    # Mirror skills catalog to MemGit when memory backend is configured.
+    upsert_skills_xml_to_memgit(xml)
 
 
 def parse_available_skills(skills_xml: str) -> list[dict]:

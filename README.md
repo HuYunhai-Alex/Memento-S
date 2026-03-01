@@ -106,6 +106,22 @@ CONTEXT_COMPRESS_THRESHOLD=60000
 SUMMARY_MAX_TOKENS=2000
 ```
 
+### 🧠 MemGit Memory Backend (optional)
+
+```env
+# Use MemGit as foundational skills memory backend
+MEMORY_BACKEND=memgit
+
+# Path to local MemGit repo (contains `memgit/` package)
+MEMGIT_ROOT=/Users/aiden/Documents/memgit
+
+# Optional scope controls
+MEMGIT_STORE_DIR=.memgit
+MEMGIT_ENV_KEY=memento-s
+MEMGIT_VERSION_KEY=v1
+MEMGIT_SKILLS_ITEM_ID=item_skills_catalog
+```
+
 ---
 
 ## 🎮 Usage

@@ -107,6 +107,14 @@ AGENTS_MD = os.getenv("AGENTS_MD", "AGENTS.md")
 SKILLS_DIR = Path(os.getenv("SKILLS_DIR", "skills"))
 SKILLS_EXTRA_DIRS = _parse_env_path_list(os.getenv("SKILLS_EXTRA_DIRS", ""))
 WORKSPACE_DIR = _resolve_env_path("WORKSPACE_DIR", "workspace")
+MEMORY_BACKEND = (os.getenv("MEMORY_BACKEND") or "agents_md").strip().lower()
+
+# MemGit-backed memory configuration.
+MEMGIT_ROOT = (os.getenv("MEMGIT_ROOT") or "").strip()
+MEMGIT_STORE_DIR = (os.getenv("MEMGIT_STORE_DIR") or ".memgit").strip()
+MEMGIT_ENV_KEY = (os.getenv("MEMGIT_ENV_KEY") or "memento-s").strip()
+MEMGIT_VERSION_KEY = (os.getenv("MEMGIT_VERSION_KEY") or "v1").strip()
+MEMGIT_SKILLS_ITEM_ID = (os.getenv("MEMGIT_SKILLS_ITEM_ID") or "item_skills_catalog").strip()
 
 # ---------------------------------------------------------------------------
 # LLM API
