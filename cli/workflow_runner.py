@@ -10,6 +10,7 @@ from typing import Any
 
 from core.config import PROJECT_ROOT
 from core.llm import openrouter_messages
+from core.memory.memgit_bridge import record_reflection, record_skill_event, record_workflow_step
 import core.router as router_module
 from core.skill_engine.skill_catalog import (
     build_available_skills_xml,
@@ -347,6 +348,12 @@ class SkillWorkflowRunner:
 
         if self.optimize_on_error and self.optimize_attempts > 0 and _should_optimize_skill(result):
             for attempt in range(1, self.optimize_attempts + 1):
+                record_skill_event(
+                    event="optimization_start",
+                    skill_name=skill_name,
+                    detail=f"optimization attempt {attempt} started due to execution/format error",
+                    step_num=step_num,
+                )
                 events.append(
                     (
                         {
@@ -384,6 +391,12 @@ class SkillWorkflowRunner:
                         report,
                     )
                 )
+                record_skill_event(
+                    event="optimization_result",
+                    skill_name=skill_name,
+                    detail=f"optimization attempt {attempt} {'ok' if ok else 'failed'}: {report}",
+                    step_num=step_num,
+                )
                 if not ok:
                     break
 
@@ -416,6 +429,12 @@ class SkillWorkflowRunner:
         target_skill = str(last_plan.get("skill_name") or "").strip()
         if action not in {"create", "update"} or not target_skill:
             return step_result
+        record_skill_event(
+            event=f"skill_creator_{action}",
+            skill_name=target_skill,
+            detail=f"skill-creator produced action={action} for {target_skill}",
+            step_num=step_num,
+        )
 
         text = str(step_result or "").strip()
         if text.startswith("ERR:"):
@@ -615,6 +634,13 @@ Return ONLY the summary, no meta-commentary."""
             yield event, event_result
 
         yield {"step_num": 1, "skill_name": skill_name, "status": "completed", "is_final": False}, result
+        record_workflow_step(
+            user_text=user_text,
+            step_num=1,
+            skill_name=skill_name,
+            instruction=str(step_user),
+            output=str(result or ""),
+        )
 
         t = time.perf_counter()
         summarized = summarize_step_output(
@@ -624,6 +650,12 @@ Return ONLY the summary, no meta-commentary."""
         )
         self._debug_timing(f"summarize_step_output(step=1, skill={skill_name})", t)
         self.context = [f"[Step 1] Skill: {skill_name}\nInstruction: {step_user}\nOutput:\n{summarized}"]
+        record_reflection(
+            user_text=user_text,
+            step_num=1,
+            skill_name=skill_name,
+            summarized_output=summarized,
+        )
         router_context = [
             build_router_step_note(
                 step_num=1,
@@ -746,6 +778,13 @@ Return ONLY the summary, no meta-commentary."""
                 "status": "completed",
                 "is_final": False,
             }, result
+            record_workflow_step(
+                user_text=user_text,
+                step_num=step_num,
+                skill_name=next_name,
+                instruction=str(next_user),
+                output=str(result or ""),
+            )
 
             t = time.perf_counter()
             summarized = summarize_step_output(
@@ -755,6 +794,12 @@ Return ONLY the summary, no meta-commentary."""
             )
             self._debug_timing(f"summarize_step_output(step={step_num}, skill={next_name})", t)
             self.context.append(f"[Step {step_num}] Skill: {next_name}\nInstruction: {next_user}\nOutput:\n{summarized}")
+            record_reflection(
+                user_text=user_text,
+                step_num=step_num,
+                skill_name=next_name,
+                summarized_output=summarized,
+            )
             router_context.append(
                 build_router_step_note(
                     step_num=step_num,

@@ -120,6 +120,7 @@ MEMGIT_STORE_DIR=.memgit
 MEMGIT_ENV_KEY=memento-s
 MEMGIT_VERSION_KEY=v1
 MEMGIT_SKILLS_ITEM_ID=item_skills_catalog
+MEMGIT_AUTO_GIT_COMMIT=true
 ```
 
 ---

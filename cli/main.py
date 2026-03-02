@@ -31,6 +31,7 @@ except Exception:
 
 from core.config import CHAT_SYSTEM_PROMPT, CLI_CREATE_ON_MISS, DEBUG, PROJECT_ROOT, refresh_runtime_config
 from core.llm import openrouter_messages, reset_llm_call_budget
+from core.memory.memgit_bridge import commit_memgit_changes, record_skill_event, record_turn
 from core.skill_engine.skill_runner import create_skill_on_miss
 from cli.skill_search import load_cloud_skill_catalog, search_cloud_skills
 from cli.workflow_runner import SkillWorkflowRunner
@@ -1190,6 +1191,11 @@ def _execute_turn(
         if debug:
             print(f"[debug][timing] {timing_label}: {time.perf_counter() - t_creator:.3f}s")
         if created and isinstance(created_skill, str) and created_skill.strip():
+            record_skill_event(
+                event="skill_created_on_miss",
+                skill_name=created_skill.strip(),
+                detail=f"router miss reason: {router_reason or 'none'}",
+            )
             print(f"Tool> router: created skill `{created_skill.strip()}`, retrying request")
             try:
                 runner.reload_skills_metadata()
@@ -1438,6 +1444,15 @@ def main(argv: list[str] | None = None) -> int:
             if len(turns) > INTERNAL_TURN_LIMIT:
                 turns = turns[-INTERNAL_TURN_LIMIT:]
             active_session["internal_turns"] = turns
+
+            record_turn(
+                user_text=request_text,
+                assistant_text=last_reply,
+                interrupted=bool(interrupted),
+                turn_index=turn_count,
+                session_id=str(active_session.get("id") or ""),
+            )
+            commit_memgit_changes(f"memento turn {turn_count}: {request_text[:80]}")
 
             _upsert_session(history_store, active_session)
             _save_history_store(history_file, history_store)
